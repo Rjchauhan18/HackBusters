@@ -1,0 +1,9 @@
+django
+yfinance
+sktime
+python-dotenv
+pandas
+scikit-learn
+deta
+pandas-ta
+plotly
