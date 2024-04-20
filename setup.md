@@ -23,7 +23,7 @@ Step 3 :
 
 - Create `.env` file which have deta_key=`your_deta_key` 
 
-- Then copy the path of `.env` file and give it to  `load_env(copied_path_to_env)` in `DSEI/dsei_app/db.py` 
+- Then copy the path of `.env` file and give it to  `load_env(copied_path_to_env)` in `TradeTrendzTrading/T3_app/db.py` 
 
 - Now we have to follow below command to create model for stocks in sqlite database.
 
