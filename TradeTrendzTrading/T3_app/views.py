@@ -1,5 +1,10 @@
-from django.shortcuts import render
-
+from django.shortcuts import render,redirect
+from django.forms import inlineformset_factory
+from django.contrib.auth.models import User
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth import authenticate,login,logout
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 # Create your views here.
 
 import os
@@ -10,15 +15,37 @@ from .utils import get_data,get_model
 from django.db.models import Q
 import json
 
+
 stocks = Stock.objects.all() # Get all stocks from the database
 
+def singup(request):
+    if request.method == 'POST':
+        form= UserCreationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            username= form.cleaned_data.get('username')
+            messages.success(request,'Account was created for '+ username)
+            return redirect('login')
+    else:
+        form= UserCreationForm()
+    return render(request, 'registration/signup.html', {'form':form})
 
+def Login(request):
+    if request.method == 'POST':
+        username= request.POST.get('username')
+        password= request.POST.get('password')
+        user= authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request,user)
+            return redirect('Home')
+        else:
+            messages.info(request,'Username or Password is incorrect')
+    return render(request, 'registration/login.html')
 
+@login_required
 def home(request):
-    
-    # Home Page hero section starting
     Nifty_chart_div = get_data.create_graph('^NSEI',timeframe='1m')
-    Nifty_chart = Nifty_chart_div.to_html(full_html=True, default_height=500, default_width=530)
+    Nifty_chart = Nifty_chart_div.to_html(full_html=True, default_height=700, default_width=1800)
 
     BankNifty_chart = get_data.create_graph('^NSEBANK',timeframe='1m')
     BankNifty_chart = BankNifty_chart.to_html(full_html=True, default_height=700, default_width=1800)
@@ -33,6 +60,7 @@ def home(request):
 
         # searched_stock_sym = Stock.objects.filter(full_name__icontains=search).values_list('symbol', flat=True)[0]
         search = Stock.objects.filter(full_name__icontains=search).values_list('full_name', flat=True)[0]
+        print(search)
         # print(searched_stock_sym)
         charts='/chart/?q='+search
         return HttpResponseRedirect(charts)
@@ -44,11 +72,10 @@ def home(request):
         'BankNifty_chart':BankNifty_chart, 
         'Sensex_chart':Sensex_chart, 
     }
-
     return render(request, 'T3_app/index.html', data)
 
     
-
+@login_required
 def chart(request):
     chart_div = None
     info = None
@@ -56,6 +83,7 @@ def chart(request):
     if 'q' in request.GET:
         searched_stock = request.GET['q']
         stock_symbol = Stock.objects.filter(full_name__icontains=searched_stock).values_list('symbol', flat=True)[0]
+        print(stock_symbol)
 
         #Searched stocks graph
         fig = get_data.create_graph(stock_symbol,timeframe='5m') 
@@ -72,7 +100,7 @@ def chart(request):
     }
 
     return render(request, 'T3_app/charts.html', data)
-
+@login_required
 def ta(request):
     decision_tree_chart = None
     decision1_tree_chart = None
@@ -123,7 +151,7 @@ def ta(request):
     }
     return render(request, 'T3_app/technical.html',data)
 
-
+@login_required
 def fundamental(request):
 
 
@@ -142,7 +170,7 @@ def fundamental(request):
     }
     return render(request, 'T3_app/fundamental.html',data)
 
-
+@login_required
 def about(request):
 
     if 'q' in request.GET:

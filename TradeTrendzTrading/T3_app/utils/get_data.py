@@ -6,6 +6,7 @@ import pandas_ta as ta
 from plotly import graph_objs as go
 from plotly.subplots import make_subplots
 import datetime as dt
+
 today = dt.date.today().strftime('%Y-%m-%d 09:15:00+05:30')
 today='2024-04-19 09:15:00+05:30'
 
@@ -24,8 +25,11 @@ def yf_data(symbol,timeframe='1m'):
     return data
 
 def get_info(symbol):
-    ticker = yf.Ticker(symbol)
-    data = ticker.info
+    try:
+        ticker = yf.Ticker(symbol)
+        data = ticker.info
+    except:
+        return "Could not fetch data. Please check the symbol and try again."
     l=['longName',
         'industry' 
        ,'website'
@@ -68,6 +72,7 @@ def get_info(symbol):
     
     return data
 
+# print(get_info('INFY.NS'))
 CustomStrategy_list=[
         {"kind": "sma", "length": 20},              #  |================= COMPLETE PLOTTING ==================|
         {"kind": "sma", "length": 50},              #  |================= COMPLETE PLOTTING ==================|
